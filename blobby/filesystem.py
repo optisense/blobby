@@ -1,6 +1,7 @@
+from datetime import timedelta
 from pathlib import Path
 
-from blobby.storage import Storage, ObjectMeta
+from blobby.storage import SignedUrlMethod, Storage, ObjectMeta
 
 
 class FileSystemStorage(Storage):
@@ -38,6 +39,15 @@ class FileSystemStorage(Storage):
 
         relative_paths = (p.relative_to(self._root_dir).as_posix() for p in paths)
         return [ObjectMeta(key=p) for p in relative_paths]
+
+    def generate_signed_url(
+        self,
+        key: str,
+        *,
+        expiration: timedelta = timedelta(hours=1),
+        method: SignedUrlMethod = SignedUrlMethod.GET,
+    ) -> str:
+        raise NotImplementedError("FileSystemStorage does not support signed URLs")
 
     def _full_path(self, key: Path | str) -> Path:
         return self._root_dir / key

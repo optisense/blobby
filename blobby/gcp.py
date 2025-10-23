@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 try:
     from google.cloud.exceptions import NotFound
     from google.cloud.storage import Bucket
@@ -7,7 +9,7 @@ except ImportError as e:
     ) from e
 
 from blobby import Storage
-from blobby.storage import ObjectMeta
+from blobby.storage import ObjectMeta, SignedUrlMethod
 
 
 class GoogleCloudStorage(Storage):
@@ -35,3 +37,18 @@ class GoogleCloudStorage(Storage):
         blobs = self._bucket.list_blobs(prefix=prefix)
 
         return [ObjectMeta(key=b.name) for b in blobs]
+
+    def generate_signed_url(
+        self,
+        key: str,
+        *,
+        expiration: timedelta = timedelta(hours=1),
+        method: SignedUrlMethod = SignedUrlMethod.GET,
+    ) -> str:
+        blob = self._bucket.blob(key)
+
+        return blob.generate_signed_url(
+            version="v4",
+            expiration=expiration,
+            method=method.value,
+        )

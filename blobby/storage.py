@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from datetime import timedelta
+from enum import Enum
 from typing import Type, TypeVar, NoReturn
 
 from pydantic import BaseModel
@@ -8,6 +10,11 @@ from blobby.error import NoSuchKeyError
 T = TypeVar("T", bound=BaseModel)
 
 _ENCODING = "utf-8"
+
+
+class SignedUrlMethod(Enum):
+    GET = "GET"
+    PUT = "PUT"
 
 
 class ObjectMeta(BaseModel):
@@ -44,6 +51,15 @@ class Storage(ABC):
 
     @abstractmethod
     def list(self, prefix: str) -> list[ObjectMeta]: ...
+
+    @abstractmethod
+    def generate_signed_url(
+        self,
+        key: str,
+        *,
+        expiration: timedelta = timedelta(hours=1),
+        method: SignedUrlMethod = SignedUrlMethod.GET,
+    ) -> str: ...
 
     def raise_key_not_found(self, key: str) -> NoReturn:
         raise NoSuchKeyError(f"key {key} not found")

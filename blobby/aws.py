@@ -1,7 +1,8 @@
 import typing
+from datetime import timedelta
 from importlib.util import find_spec
 
-from blobby.storage import Storage, ObjectMeta
+from blobby.storage import Storage, ObjectMeta, SignedUrlMethod
 
 if typing.TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -44,3 +45,19 @@ class S3Storage(Storage):
         response = self._client.list_objects_v2(Bucket=self._bucket_name, Prefix=prefix)
 
         return [ObjectMeta(key=meta["Key"]) for meta in response["Contents"]]
+
+    def generate_signed_url(
+        self,
+        key: str,
+        *,
+        expiration: timedelta = timedelta(hours=1),
+        method: SignedUrlMethod = SignedUrlMethod.GET,
+    ) -> str:
+        client_method = "get_object" if method == SignedUrlMethod.GET else "put_object"
+        expires_in = int(expiration.total_seconds())
+
+        return self._client.generate_presigned_url(
+            ClientMethod=client_method,
+            Params={"Bucket": self._bucket_name, "Key": key},
+            ExpiresIn=expires_in,
+        )
