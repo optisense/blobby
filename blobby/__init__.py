@@ -1,7 +1,8 @@
 from blobby.error import NoSuchKeyError
-from blobby.storage import Storage
+from blobby.storage import SignedUrlMethod, Storage
 
 __all__ = [
     "NoSuchKeyError",
+    "SignedUrlMethod",
     "Storage",
 ]

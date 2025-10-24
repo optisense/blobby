@@ -1,5 +1,7 @@
+from datetime import timedelta
+
 from blobby import Storage
-from blobby.storage import ObjectMeta
+from blobby.storage import ObjectMeta, SignedUrlMethod
 
 
 class MemoryStorage(Storage):
@@ -23,3 +25,12 @@ class MemoryStorage(Storage):
 
     def list(self, prefix: str) -> list[ObjectMeta]:
         return [ObjectMeta(key=k) for k in self._storage.keys() if k.startswith(prefix)]
+
+    def generate_signed_url(
+        self,
+        key: str,
+        *,
+        expiration: timedelta = timedelta(hours=1),
+        method: SignedUrlMethod = SignedUrlMethod.GET,
+    ) -> str:
+        raise NotImplementedError("MemoryStorage does not support signed URLs")
